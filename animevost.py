@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import re
 from time import sleep
 from database import DBWriter
+import random, string
 
 
 class Animevost:
@@ -26,8 +27,9 @@ class Animevost:
         day = ''
         name = ''
         episodenow = 0
-        episodelast = 0
+        allepisodes = 0
         i = 0
+        id = ''
         # проходимся по всем блокам с релизами и смотрим ссылки и названия аниме
         for ident in self.linksident:
             for block in bs.find_all('div', {'id': ident}):
@@ -38,10 +40,13 @@ class Animevost:
                         href = self.link + a.attrs['href']
                     else:
                         href = self.link + '/' + a.attrs['href']
-                    episodenow = self.get_ongoing(href)
+                    episodez = self.get_ongoing(href)
+                    episodenow, allepisodes = episodez[0], episodez[1]
                     if episodenow is False:
                         continue
-                    report.append([name, day, episodenow])
+                    id = self.randid()
+
+                    report.append([name, day, episodenow, allepisodes, id])
                     print(a.text, ' Done')
                     sleep(1)
         self.push_db(report)
@@ -53,7 +58,8 @@ class Animevost:
             bs = BeautifulSoup(req.text, 'html.parser')
             episodes = bs.find('div',{'class':self.seriaident})
             episodenow = re.findall(r'\w[0-9]*-[0-9]*',episodes.text)[0].split('-')[-1]
-            return episodenow
+            episodelast = re.findall(r'из [0-9]*', episodes.text)[0].replace('из ', '')
+            return [episodenow,episodelast]
         except:
             return False
 
@@ -62,3 +68,7 @@ class Animevost:
 
     def test(self):
         print('Animevost working!')
+
+    def randid(self):
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(10))
