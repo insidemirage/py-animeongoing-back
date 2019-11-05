@@ -2,7 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-from time import sleep
+from time import sleep, time
 from database import DBWriter
 import random, string
 
@@ -23,8 +23,11 @@ class Animevost:
         pass
 
     def full_update(self):
+        starttime = time()
         report = self.get_links()
         self.db.push(report)
+        endtime = time()-starttime
+        print('Done in %d s'%endtime)
     # Эта функция используется для получения списка всех онгоингов
 
     def get_links(self):
