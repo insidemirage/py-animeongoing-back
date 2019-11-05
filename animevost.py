@@ -19,7 +19,14 @@ class Animevost:
         filename = 'animevost.csv'
         self.db = DBWriter(filename)
 
+    def update(self):
+        pass
+
+    def full_update(self):
+        report = self.get_links()
+        self.db.push(report)
     # Эта функция используется для получения списка всех онгоингов
+
     def get_links(self):
         req = requests.get(self.link)
         bs = BeautifulSoup(req.text, 'html.parser')
@@ -30,12 +37,15 @@ class Animevost:
         allepisodes = 0
         i = 0
         id = ''
+        t = '' #time переменная
         # проходимся по всем блокам с релизами и смотрим ссылки и названия аниме
         for ident in self.linksident:
             for block in bs.find_all('div', {'id': ident}):
                 day = self.days[i]
                 for a in block.find_all('a'):
                     name = a.text
+                    t = self.get_time(name)
+
                     if a.attrs['href'][0] == '/':
                         href = self.link + a.attrs['href']
                     else:
@@ -44,12 +54,12 @@ class Animevost:
                     episodenow, allepisodes = episodez[0], episodez[1]
                     if episodenow is False:
                         continue
-                    id = self.randid()
+                    id = self.randid(report)
 
-                    report.append([name, day, episodenow, allepisodes, id])
+                    report.append([name, day, t, episodenow, allepisodes, id])
                     print(a.text, ' Done')
                     sleep(1)
-        self.push_db(report)
+        return report
     # Получаем количество вышедших серий и возвращаем в get_links
 
     def get_ongoing(self, url):
@@ -66,9 +76,25 @@ class Animevost:
     def push_db(self, report):
         self.db.push(report)
 
-    def test(self):
-        print('Animevost working!')
-
-    def randid(self):
+    def randid(self,database):
         letters = string.ascii_lowercase
-        return ''.join(random.choice(letters) for i in range(10))
+        id =  ''.join(random.choice(letters) for i in range(10))
+        if len(database) == 1:
+            return id
+        if self.check_id(database, id) is False:
+            self.randid(database)
+        else:
+            return id
+
+    def check_id(self, database, id):
+        ids = []
+        for i in database:
+            ids.append(i[4])
+        if id in ids:
+            return False
+        else:
+            return True
+
+    def get_time(self,name):
+        t = re.findall(r'([0-9]*:[0-9]*)',name)
+        return t
