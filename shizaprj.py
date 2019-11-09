@@ -13,8 +13,23 @@ class Shizaprj(AnimeInfo):
         self.topelem = 'params'
 
     def get_links(self):
-        # TODO Дописать функцию для получения страниц онгоингов(на случай, если она будет всего одна или несколько)
-        pages = [self.link+'status/ongoing',self.link+'status/ongoing?page=2']
+        urlnow = self.onlink
+        pages = []
+        i = 0
+        # Тут мы проходимся по всем доступным страницам расписания и получаем список всех страниц
+        while True:
+            if i == 2:
+                break
+            req = super().get_links(urlnow)
+            bs = BeautifulSoup(req.text, 'html.parser')
+            nextl = bs.find('a', attrs={'rel': 'next'})
+            if nextl is None:
+                print('all pages catched')
+                pages.append(urlnow)
+                break
+            pages.append(urlnow)
+            urlnow = nextl.attrs['href']
+        print(pages)
         report = []
 
         for page in pages:
@@ -38,6 +53,7 @@ class Shizaprj(AnimeInfo):
                     episodenow = re.findall(r'\d[0-9]*', serias.text)[-1]
                 else:
                     episodenow = '1'
+                episodenow = int(episodenow)
          #   ищем ссылку в карточке указывающую на страницу аниме
                 link = card.find('a', {'class':self.linkident})
             # получаем информацию об онгоинге(все эпизоды)
@@ -69,3 +85,5 @@ class Shizaprj(AnimeInfo):
         else:
             return False
 
+shiza = Shizaprj('http://shiza-project.com/', 'http://shiza-project.com/status/ongoing', 'shiza.csv')
+shiza.get_links()

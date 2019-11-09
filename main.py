@@ -8,7 +8,7 @@ import os
 def fulupd():
     animevost = Animevost('https://a30.agorov.org/', 'https://a30.agorov.org/', 'animevost.csv')
     anilibria = Anilibria('https://www.anilibria.tv', 'https://www.anilibria.tv/pages/schedule.php', 'anilib.csv')
-    shiza = Shizaprj('http://shiza-project.com/', 'http://shiza-project.com/releases/view/1410', 'shiza.csv')
+    shiza = Shizaprj('http://shiza-project.com/', 'http://shiza-project.com/status/ongoing', 'shiza.csv')
     animevostprc = Process(target=animevost.full_update)
     shizaprc = Process(target=shiza.full_update)
     anilibriaprc = Process(target=anilibria.full_update)
