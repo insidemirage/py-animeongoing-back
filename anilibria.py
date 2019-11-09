@@ -4,8 +4,8 @@ from animeinfo import AnimeInfo
 
 
 class Anilibria(AnimeInfo):
-    def __init__(self, link, onlink, namebase):
-        super().__init__(link, onlink,namebase)
+    def __init__(self, link, onlink, namebase, name):
+        super().__init__(link, onlink, namebase, name)
 
         self.linksident = 'test'
         self.linksanime = 'goodcell'
@@ -37,6 +37,8 @@ class Anilibria(AnimeInfo):
                 else:
                     episodenow = episodenow[1]
                 id = self.randid(report, 3)
+                log = '{0},{1},{2}'.format(name,day,episodenow)
+                self.logger(log,status='Done')
                 report.append([name, day,episodenow, id])
         return report
 

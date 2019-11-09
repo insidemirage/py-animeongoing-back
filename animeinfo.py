@@ -6,13 +6,16 @@ import requests
 import string
 import os
 
+
 class AnimeInfo(ABC):
-    def __init__(self, link, onlink, namebase):
+    def __init__(self, link, onlink, namebase, name):
         self.link = link
         self.onlink = onlink
         self.days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье', 'Нестабильные релизы']
         self.db = DBWriter(namebase)
         self.namebase = namebase
+        self.name = name
+
     # Метод запускает полное обновление списка аниме
     def full_update(self):
         print('Process pid:{0} name: {1}'.format(os.getpid(),self.namebase.split('.')[0]))
@@ -20,7 +23,7 @@ class AnimeInfo(ABC):
         report = self.get_links()
         self.db.push(report)
         t = time()-t
-        print('Done in %d sec'%t)
+        self.logger('Done in %d sec'%t)
         if report is None:
             return False
         elif report is []:
@@ -80,3 +83,9 @@ class AnimeInfo(ABC):
             return False
         else:
             return True
+
+    def logger(self,message, status = None):
+        if status is None:
+            print('{0} : {1}'.format(self.name,message))
+        elif status is "Done":
+            print('[+] {0} : {1}'.format(self.name,message))

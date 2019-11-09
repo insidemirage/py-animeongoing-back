@@ -6,8 +6,8 @@ from animeinfo import AnimeInfo
 
 class Animevost(AnimeInfo):
 
-    def __init__(self, link, onlink, namebase):
-        super().__init__(link, onlink, namebase)
+    def __init__(self, link, onlink, namebase,name):
+        super().__init__(link, onlink, namebase,name)
         self.linksident = 'raspisMon, raspisTue, raspisWed, raspisThu, raspisFri, raspisSat, raspisSun, raspisNest'
         self.linksident = self.linksident.split(', ')
         self.seriaident = 'shortstoryHead'
@@ -48,7 +48,8 @@ class Animevost(AnimeInfo):
                     identificator = self.randid(report,5)
 
                     report.append([name, day, t, episodenow, allepisodes, identificator])
-                    print(a.text, ' Done')
+                    log = '{0},{1},{2},now:{3},all:{4}'.format(name,day,t,episodenow,allepisodes)
+                    self.logger(log, status='Done')
         return report
     # Получаем количество вышедших серий и возвращаем в get_links
 

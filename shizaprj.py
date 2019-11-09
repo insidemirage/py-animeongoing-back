@@ -5,8 +5,8 @@ from animeinfo import AnimeInfo
 
 
 class Shizaprj(AnimeInfo):
-    def __init__(self,link,onlink,namebase):
-        super().__init__(link, onlink, namebase)
+    def __init__(self,link, onlink, namebase, name):
+        super().__init__(link, onlink, namebase, name)
         self.cardident = 'grid-card'
         self.statusind = 'relstatus'
         self.linkident = 'card-box'
@@ -24,17 +24,16 @@ class Shizaprj(AnimeInfo):
             bs = BeautifulSoup(req.text, 'html.parser')
             nextl = bs.find('a', attrs={'rel': 'next'})
             if nextl is None:
-                print('all pages catched')
+                self.logger('All pages catched', status='Done')
                 pages.append(urlnow)
                 break
             pages.append(urlnow)
             urlnow = nextl.attrs['href']
-        print(pages)
+        self.logger(pages)
         report = []
 
         for page in pages:
             req = super().get_links(page)
-            print(req)
             if req is False:
                 return False
             bs = BeautifulSoup(req.text, 'html.parser')
@@ -58,10 +57,12 @@ class Shizaprj(AnimeInfo):
                 link = card.find('a', {'class':self.linkident})
             # получаем информацию об онгоинге(все эпизоды)
                 allepisodes = self.get_ongoing(link.attrs['href'])
+
             # получаем название онгоинга
                 name = link.find('img').attrs['alt']
-                print(name, episodenow, serias.text)
                 id = self.randid(report, 3)
+                log = '{0},now:{1},all:{2} Done'.format(name,episodenow,allepisodes)
+                self.logger(log,status='Done')
                 report.append([name, episodenow, allepisodes, id])
         return report
         # проходимся по всем блокам с релизами и смотрим ссылки и названия аниме
@@ -85,5 +86,3 @@ class Shizaprj(AnimeInfo):
         else:
             return False
 
-shiza = Shizaprj('http://shiza-project.com/', 'http://shiza-project.com/status/ongoing', 'shiza.csv')
-shiza.get_links()
