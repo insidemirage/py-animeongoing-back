@@ -18,7 +18,8 @@ class Shizaprj(AnimeInfo):
         report = []
 
         for page in pages:
-            req = super().get_links()
+            req = super().get_links(page)
+            print(req)
             if req is False:
                 return False
             bs = BeautifulSoup(req.text, 'html.parser')
@@ -34,7 +35,7 @@ class Shizaprj(AnimeInfo):
                 if '-' in serias.text:
                     episodenow = re.findall(r'[0-9]*-[0-9]*', serias.text)[0].split('-')[-1]
                 elif not len(re.findall(r'\d[0-9]*', serias.text)) == 0:
-                    episodenow = re.findall(r'\d[0-9]*', serias.text)[0]
+                    episodenow = re.findall(r'\d[0-9]*', serias.text)[-1]
                 else:
                     episodenow = '1'
          #   ищем ссылку в карточке указывающую на страницу аниме
@@ -56,6 +57,8 @@ class Shizaprj(AnimeInfo):
         if req is not False:
             bs = BeautifulSoup(req.text, 'html.parser')
             topelem = bs.find('ul', {'class':self.topelem})
+            if topelem is None:
+                return 'xx'
             nexitem = topelem.find_all('li')[1]
             link = nexitem.find('a')
             link = link.text
@@ -65,3 +68,4 @@ class Shizaprj(AnimeInfo):
             return alleps
         else:
             return False
+

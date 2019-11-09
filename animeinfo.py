@@ -4,7 +4,7 @@ import random
 from abc import ABC, abstractmethod
 import requests
 import string
-
+import os
 
 class AnimeInfo(ABC):
     def __init__(self, link, onlink, namebase):
@@ -12,9 +12,10 @@ class AnimeInfo(ABC):
         self.onlink = onlink
         self.days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье', 'Нестабильные релизы']
         self.db = DBWriter(namebase)
-
+        self.namebase = namebase
     # Метод запускает полное обновление списка аниме
     def full_update(self):
+        print('Process pid:{0} name: {1}'.format(os.getpid(),self.namebase.split('.')[0]))
         t = time()
         report = self.get_links()
         self.db.push(report)
@@ -37,7 +38,7 @@ class AnimeInfo(ABC):
             url = url
 
         try:
-            req = requests.get(self.onlink)
+            req = requests.get(url)
         except requests.exceptions as e:
             print(e)
             return False
