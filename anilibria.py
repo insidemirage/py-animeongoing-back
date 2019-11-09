@@ -1,33 +1,20 @@
-import requests
 from bs4 import BeautifulSoup
 import re
-from time import sleep
-from database import DBWriter
-import random, string
+from animeinfo import AnimeInfo
 
-class Anilibria:
-    def __init__(self):
-        self.link = 'https://www.anilibria.tv'
-        self.rasplink = 'https://www.anilibria.tv/pages/schedule.php'
+
+class Anilibria(AnimeInfo):
+    def __init__(self, link, onlink, namebase):
+        super().__init__(link, onlink,namebase)
+
         self.linksident = 'test'
         self.linksanime = 'goodcell'
         self.animename = 'schedule-runame'
         self.epnowid = 'schedule-series'
-        # self.linksident = self.linksident.split(', ')
-        self.days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
         self.seriaident = 'shortstoryHead'
-        filename = 'anilibria.csv'
-        self.db = DBWriter(filename)
-
-    def update(self):
-        pass
-
-    def full_update(self):
-        report = self.get_links()
-        self.db.push(report)
 
     def get_links(self):
-        req = requests.get(self.rasplink)
+        req = super().get_links()
         soup = BeautifulSoup(req.text, 'html.parser')
         report = []
         day = ''
@@ -49,25 +36,9 @@ class Anilibria:
                     episodenow = episodenow[0]
                 else:
                     episodenow = episodenow[1]
-                id = self.randid(report)
+                id = self.randid(report, 3)
                 report.append([name, day,episodenow, id])
         return report
-    def randid(self,database):
-        letters = string.ascii_lowercase
-        id =  ''.join(random.choice(letters) for i in range(10))
-        if len(database) == 1:
-            return id
-        if self.check_id(database, id) is False:
-            self.randid(database)
-        else:
-            return id
 
-    def check_id(self, database, id):
-        ids = []
-        for i in database:
-            ids.append(i[3])
-        if id in ids:
-            return False
-        else:
-            return True
-
+    def get_ongoing(self, url):
+        super().get_ongoing(url)

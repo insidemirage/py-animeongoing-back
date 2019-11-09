@@ -16,3 +16,7 @@ if __name__ == "__main__":
     f = Shizaprj().full_update()
     if f is False:
         print('bad return')
+
+
+        #   self.link = 'http://shiza-project.com/'
+        #         self.ongoinglink = 'http://shiza-project.com/releases/view/1410'

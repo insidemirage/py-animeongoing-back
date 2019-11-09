@@ -1,37 +1,22 @@
 # coding=utf-8
-import requests
 from bs4 import BeautifulSoup
 import re
-from time import sleep, time
-from database import DBWriter
-import random, string
+from animeinfo import AnimeInfo
 
 
-class Animevost:
-    def __init__(self):
-        self.link = 'https://a30.agorov.org'
-        self.linksident = 'raspisMon, raspisTue'
-        # , raspisWed, raspisThu, raspisFri, raspisSat, raspisSun, raspisNest'
+class Animevost(AnimeInfo):
+
+    def __init__(self, link, onlink, namebase):
+        super().__init__(link, onlink, namebase)
+        self.linksident = 'raspisMon, raspisTue, raspisWed, raspisThu, raspisFri, raspisSat, raspisSun, raspisNest'
         self.linksident = self.linksident.split(', ')
-        #
-        self.days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье', 'Нестабильные релизы']
         self.seriaident = 'shortstoryHead'
-        filename = 'animevost.csv'
-        self.db = DBWriter(filename)
 
-    def update(self):
-        pass
-
-    def full_update(self):
-        starttime = time()
-        report = self.get_links()
-        self.db.push(report)
-        endtime = time()-starttime
-        print('Done in %d s'%endtime)
-    # Эта функция используется для получения списка всех онгоингов
-
+    # Функция для получения списка онгоингов
     def get_links(self):
-        req = requests.get(self.link)
+        req = super().get_links()
+        if req is False:
+            return False
         bs = BeautifulSoup(req.text, 'html.parser')
         report = []
         day = ''
@@ -45,6 +30,7 @@ class Animevost:
         for ident in self.linksident:
             for block in bs.find_all('div', {'id': ident}):
                 day = self.days[i]
+                i += 1
                 for a in block.find_all('a'):
                     name = a.text
                     t = self.get_time(name)
@@ -54,50 +40,35 @@ class Animevost:
                     else:
                         href = self.link + '/' + a.attrs['href']
                     episodez = self.get_ongoing(href)
+                    if episodez is False:
+                        continue
                     episodenow, allepisodes = episodez[0], episodez[1]
                     if episodenow is False:
                         continue
-                    id = self.randid(report)
+                    identificator = self.randid(report,5)
 
-                    report.append([name, day, t, episodenow, allepisodes, id])
+                    report.append([name, day, t, episodenow, allepisodes, identificator])
                     print(a.text, ' Done')
-                    sleep(1)
         return report
     # Получаем количество вышедших серий и возвращаем в get_links
 
     def get_ongoing(self, url):
-        try:
-            req = requests.get(url)
-            bs = BeautifulSoup(req.text, 'html.parser')
-            episodes = bs.find('div',{'class':self.seriaident})
-            episodenow = re.findall(r'\w[0-9]*-[0-9]*',episodes.text)[0].split('-')[-1]
-            episodelast = re.findall(r'из [0-9]*', episodes.text)[0].replace('из ', '')
-            return [episodenow,episodelast]
-        except:
+        req = super().get_ongoing(url)
+        if req is False:
             return False
+        bs = BeautifulSoup(req.text, 'html.parser')
+        episodes = bs.find('div',{'class':self.seriaident})
+        episodenow = re.findall(r'\w[0-9]*-[0-9]*',episodes.text)[0].split('-')[-1]
+        episodelast = re.findall(r'из [0-9]*', episodes.text)[0].replace('из ', '')
+        return [episodenow,episodelast]
 
-    def push_db(self, report):
-        self.db.push(report)
-
-    def randid(self,database):
-        letters = string.ascii_lowercase
-        id =  ''.join(random.choice(letters) for i in range(10))
-        if len(database) == 1:
-            return id
-        if self.check_id(database, id) is False:
-            self.randid(database)
+    # Получаем время обновления серии
+    @staticmethod
+    def get_time(name):
+        t = re.findall(r'([0-9]*:[0-9]*)', name)
+        if len(t) > 0:
+            return t[-1]
         else:
-            return id
+            return 'ninfo'
 
-    def check_id(self, database, id):
-        ids = []
-        for i in database:
-            ids.append(i[4])
-        if id in ids:
-            return False
-        else:
-            return True
 
-    def get_time(self,name):
-        t = re.findall(r'([0-9]*:[0-9]*)',name)
-        return t
