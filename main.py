@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # Testing
     # animevost = Animevost()
     # animevost.full_update()
-    f = Shizaprj().full_update()
+    f = Shizaprj('http://shiza-project.com/', 'http://shiza-project.com/','shiza.csv').full_update()
     if f is False:
         print('bad return')
 

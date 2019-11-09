@@ -30,7 +30,12 @@ class AnimeInfo(ABC):
             return True
 
     @abstractmethod
-    def get_links(self):
+    def get_links(self, url=None):
+        if url is None:
+            url = self.onlink
+        else:
+            url = url
+
         try:
             req = requests.get(self.onlink)
         except requests.exceptions as e:

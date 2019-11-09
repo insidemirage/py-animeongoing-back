@@ -6,7 +6,7 @@ from animeinfo import AnimeInfo
 
 class Shizaprj(AnimeInfo):
     def __init__(self,link,onlink,namebase):
-        super().__init__(link,onlink,namebase)
+        super().__init__(link, onlink, namebase)
         self.cardident = 'grid-card'
         self.statusind = 'relstatus'
         self.linkident = 'card-box'
@@ -38,13 +38,13 @@ class Shizaprj(AnimeInfo):
                 else:
                     episodenow = '1'
          #   ищем ссылку в карточке указывающую на страницу аниме
-                print(episodenow, serias.text)
                 link = card.find('a', {'class':self.linkident})
             # получаем информацию об онгоинге(все эпизоды)
-                allepisodes = self.get_ongoing(self.onlink)
+                allepisodes = self.get_ongoing(link.attrs['href'])
             # получаем название онгоинга
                 name = link.find('img').attrs['alt']
-                id = self.randid(report,3)
+                print(name, episodenow, serias.text)
+                id = self.randid(report, 3)
                 report.append([name, episodenow, allepisodes, id])
         return report
         # проходимся по всем блокам с релизами и смотрим ссылки и названия аниме

@@ -41,7 +41,7 @@ class TestAnimevost(unittest.TestCase):
 
         file.write(line)
         file.close()
-        
+
     def test_getlinks(self):
         self.assertIsInstance(self.animevost.get_links(), list)
 
