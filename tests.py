@@ -79,7 +79,9 @@ class TestAnilibria(unittest.TestCase):
     def test_fullupd(self):
         self.assertTrue(self.anilibria.full_update())
 
-
+class TestDataBase(unittest.TestCase):
+    def test_test(self):
+        pass
 if __name__ == '__main__':
 
     unittest.main()
