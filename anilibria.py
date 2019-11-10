@@ -56,7 +56,6 @@ class Anilibria(AnimeInfo):
         return super().catchlinks(today, links)
 
     def getepisodenow(self, url):
-        # TODO эта конструкция должна использоваться для поиска эпизодов во всех классах аниме по solid
         req = super().getepisodenow(self.onlink)
         bs = BeautifulSoup(req.text, 'html.parser')
         link = bs.find('a',{'href':url})

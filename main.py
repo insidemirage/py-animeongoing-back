@@ -13,11 +13,11 @@ def fulupd():
     animevostprc = Process(target=animevost.full_update)
     shizaprc = Process(target=shiza.full_update)
     anilibriaprc = Process(target=anilibria.full_update)
-    # animevostprc.start()
-    # shizaprc.start()
+    animevostprc.start()
+    shizaprc.start()
     anilibriaprc.start()
-    # animevostprc.join()
-    # shizaprc.join()
+    animevostprc.join()
+    shizaprc.join()
     anilibriaprc.join()
 
 
@@ -37,6 +37,7 @@ def halfupd():
     print('----------------------------------------------------------------')
 
 def main():
+    fulupd()
     schedule.every(30).minutes.do(halfupd)
     schedule.every().day.at("04:00").do(fulupd)
 

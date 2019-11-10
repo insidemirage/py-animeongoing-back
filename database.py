@@ -14,20 +14,22 @@ class DataBase(ABC):
         self.flags = FlagsBD()  
         print(self.flags.PUSHONE)  
     #Флаг hard регулирует полную вставку документов с подчищением предыдущих экземляров для fullupd 
-    @abstractmethod
-    def push(self,data, hard = False, flag = ''):
+    
+    def connect(self):
         connection = pymongo.MongoClient()
         db = connection.animelist
-        # TODO привести в нормальный вид эту функцию
+        animecol = db[self.name]
+        return animecol,db
+
+    @abstractmethod
+    def push(self,data, hard = False, flag = ''):
+        animecol,db = self.connect()
         if hard is True:
             db.drop_collection(self.name)
-            animecol = db[self.name]
             animecol.insert_many(data)
         elif flag is self.flags.PUSHONE:
-            animecol = db[self.name]
             animecol.insert_one(data)
         else:
-            animecol = db[self.name]
             anime = animecol.find_one({'_id':data[1]['_id']})
             print(data[0])
             anime['epnow'] = data[0]
@@ -36,13 +38,11 @@ class DataBase(ABC):
         return True
 
     def today_links(self,nowdate):
-        # TODO нужно что то сделать с коннектами к базе, это выглядит ужасно
-        connection = pymongo.MongoClient()
-        db = connection.animelist
-        collection = db[self.name]
+        animecol,db = self.connect()
         animelist = []
-        # TODO сделать исключение для пустого списка
-        for anime in collection.find():
+        if animecol.find() is None:
+            return False
+        for anime in animecol.find():
             day = int(anime['day'])
             if day == nowdate:
                 animelist.append(anime)
