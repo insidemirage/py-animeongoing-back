@@ -2,20 +2,30 @@ import csv
 from abc import ABC, abstractmethod
 import pymongo
 
+class FlagsBD:
+    def __init__(self):
+        self.PUSHONE = 'PUSHONE'
+        self.DELETEBD = 'DELETEBD'
+        self.REMOVECOL = 'REMOVECOL'
 
 class DataBase(ABC):
     def __init__(self, bdname):
         self.name = bdname
-    
+        self.flags = FlagsBD()  
+        print(self.flags.PUSHONE)  
     #Флаг hard регулирует полную вставку документов с подчищением предыдущих экземляров для fullupd 
     @abstractmethod
-    def push(self,data, hard = False):
+    def push(self,data, hard = False, flag = ''):
         connection = pymongo.MongoClient()
         db = connection.animelist
+        # TODO привести в нормальный вид эту функцию
         if hard is True:
             db.drop_collection(self.name)
             animecol = db[self.name]
             animecol.insert_many(data)
+        elif flag is self.flags.PUSHONE:
+            animecol = db[self.name]
+            animecol.insert_one(data)
         else:
             animecol = db[self.name]
             anime = animecol.find_one({'_id':data[1]['_id']})
@@ -23,8 +33,10 @@ class DataBase(ABC):
             anime['epnow'] = data[0]
             animecol.save(anime)
             print('Done')
+        return True
 
     def today_links(self,nowdate):
+        # TODO нужно что то сделать с коннектами к базе, это выглядит ужасно
         connection = pymongo.MongoClient()
         db = connection.animelist
         collection = db[self.name]
@@ -52,22 +64,22 @@ class AnimevostBase(DataBase):
     def __init__(self, name):
         super().__init__(name)
 
-    def push(self,data, hard = False):
-        return super().push(data, hard)
+    def push(self,data, hard = False, flag = None):
+        return super().push(data, hard, flag)
 
 
 class ShizaBase(DataBase):
     def __init__(self, name):
         super().__init__(name)
 
-    def push(self,data, hard = False):
-        return super().push(data, hard)
+    def push(self,data, hard = False, flag = None):
+        return super().push(data, hard, flag)
     
 
 class AnilibriaBase(DataBase):
     def __init__(self, name):
         super().__init__(name)
 
-    def push(self,data, hard = False):
-        return super().push(data, hard)
+    def push(self,data, hard = False, flag = None):
+        return super().push(data, hard, flag)
         

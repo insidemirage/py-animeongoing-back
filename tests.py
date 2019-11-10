@@ -2,6 +2,7 @@ import unittest
 from animevost import Animevost
 from anilibria import Anilibria
 from shizaprj import Shizaprj
+from database import AnimevostBase
 w = [
     ['Вавилон ~ (18:00)', 'Понедельник', '5', '12', 'emmdxeklxk'],
     ['Фантастическая звезда онлайн 2: Эпизод Оракул ~ (20:30)', 'Понедельник', 5, 12, 'uyiqktrfth']
@@ -80,8 +81,10 @@ class TestAnilibria(unittest.TestCase):
         self.assertTrue(self.anilibria.full_update())
 
 class TestDataBase(unittest.TestCase):
-    def test_test(self):
-        pass
+    def test_dev(self):
+        db = AnimevostBase('animevost')
+        data = {'name':'214','day':'1244','_id':'12akjgjkgj'}
+        self.assertTrue(db.push(data,flag=db.flags.PUSHONE))
 if __name__ == '__main__':
 
     unittest.main()
