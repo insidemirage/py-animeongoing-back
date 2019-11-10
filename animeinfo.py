@@ -45,8 +45,9 @@ class AnimeInfo(ABC):
     def getepisodenow(self,url):
         try:
             req = requests.get(url)
-        except requests.Exception:
-            self.logger(requests.Exception, status=self.loggermsg.ErrConnect)
+        except:
+            self.logger('Connection error', status=self.loggermsg.ErrConnect)
+            return False
         return req
 
     @abstractmethod
