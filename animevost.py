@@ -2,7 +2,7 @@
 from bs4 import BeautifulSoup
 import re
 from animeinfo import AnimeInfo
-
+from database import AnimevostBase
 
 class Animevost(AnimeInfo):
 
@@ -11,7 +11,7 @@ class Animevost(AnimeInfo):
         self.linksident = 'raspisMon, raspisTue, raspisWed, raspisThu, raspisFri, raspisSat, raspisSun, raspisNest'
         self.linksident = self.linksident.split(', ')
         self.seriaident = 'shortstoryHead'
-
+        self.db = AnimevostBase('animevost')
     # Функция для получения списка онгоингов
     def get_links(self):
         req = super().get_links()
@@ -33,6 +33,7 @@ class Animevost(AnimeInfo):
                 i += 1
                 for a in block.find_all('a'):
                     name = a.text
+                    name = re.sub(r"~(.*?)\(.*?\)",'',name)
                     t = self.get_time(name)
 
                     if a.attrs['href'][0] == '/':
@@ -45,11 +46,17 @@ class Animevost(AnimeInfo):
                     episodenow, allepisodes = episodez[0], episodez[1]
                     if episodenow is False:
                         continue
-                    identificator = self.randid(report,5)
 
-                    report.append([name, day, t, episodenow, allepisodes, identificator])
+                    report.append({
+                        'name':name,
+                        'day':day,
+                        'time':t,
+                        'epnow':episodenow,
+                        'alleps':allepisodes,
+                        'link':href
+                    })
                     log = '{0},{1},{2},now:{3},all:{4}'.format(name,day,t,episodenow,allepisodes)
-                    self.logger(log, status='Done')
+                    self.logger(log, status=self.loggermsg.Done)
         return report
     # Получаем количество вышедших серий и возвращаем в get_links
 
@@ -72,4 +79,16 @@ class Animevost(AnimeInfo):
         else:
             return 'ninfo'
 
+    def getepisodenow(self, url):
+        req = super().getepisodenow(url)
+        bs = BeautifulSoup(req.text, 'html.parser')
+        episodes = bs.find('div', {'class': 'shortstoryHead'})
+        episodenow = re.findall(r'\w[0-9]*-[0-9]*', episodes.text)[0].split('-')[-1]
+        return episodenow
+
+    def catchlinks(self, today, links):
+        return super().catchlinks(today, links)
+
+    def update(self, today, mins):
+        super().update(today, mins)
 

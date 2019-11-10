@@ -2,7 +2,7 @@
 from bs4 import BeautifulSoup
 import re
 from animeinfo import AnimeInfo
-
+from database import ShizaBase
 
 class Shizaprj(AnimeInfo):
     def __init__(self,link, onlink, namebase, name):
@@ -11,7 +11,7 @@ class Shizaprj(AnimeInfo):
         self.statusind = 'relstatus'
         self.linkident = 'card-box'
         self.topelem = 'params'
-
+        self.db = ShizaBase('shizaprj')
     def get_links(self):
         urlnow = self.onlink
         pages = []
@@ -41,7 +41,6 @@ class Shizaprj(AnimeInfo):
             name = ''
             episodenow = 0
             allepisodes = 0
-            id = ''
             # Проходимся по всем карточкам на главной
             for card in bs.find_all('article', {'class':self.cardident}):
             # получаем строку в которой хранятся данные о выпуске серий
@@ -60,10 +59,13 @@ class Shizaprj(AnimeInfo):
 
             # получаем название онгоинга
                 name = link.find('img').attrs['alt']
-                id = self.randid(report, 3)
                 log = '{0},now:{1},all:{2} Done'.format(name,episodenow,allepisodes)
-                self.logger(log,status='Done')
-                report.append([name, episodenow, allepisodes, id])
+                self.logger(log,status=self.loggermsg.Done)
+                report.append({
+                    'name':name,
+                    'epnow':episodenow,
+                    'alleps':allepisodes
+                })
         return report
         # проходимся по всем блокам с релизами и смотрим ссылки и названия аниме
 
@@ -86,3 +88,12 @@ class Shizaprj(AnimeInfo):
         else:
             return False
 
+    def update(self, today, mins):
+        return super().update(today, mins)
+
+    def catchlinks(self, today, links):
+        return super().catchlinks(today, links)
+
+    def getepisodenow(self, url):
+        return super().getepisodenow(url)
+                

@@ -1,27 +1,35 @@
 from time import time
-from database import DBWriter
 import random
 from abc import ABC, abstractmethod
 import requests
 import string
 import os
+from threading import Timer
+from bs4 import BeautifulSoup
+import re
+
+class LoggerMessages:
+    def __init__(self):
+        self.Done = 'Done'
+        self.Connect = 'Connect'
+        self.ErrConnect = 'Connection Error'
+        self.ProcConnect = 'ProcConnect'
 
 
 class AnimeInfo(ABC):
     def __init__(self, link, onlink, namebase, name):
         self.link = link
         self.onlink = onlink
-        self.days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье', 'Нестабильные релизы']
-        self.db = DBWriter(namebase)
+        self.days = [i for i in range(0,8)]
         self.namebase = namebase
         self.name = name
-
+        self.loggermsg = LoggerMessages()
     # Метод запускает полное обновление списка аниме
     def full_update(self):
-        print('Process pid:{0} name: {1}'.format(os.getpid(),self.namebase.split('.')[0]))
+        self.logger(status=self.loggermsg.ProcConnect)
         t = time()
         report = self.get_links()
-        self.db.push(report)
+        self.db.push(report, hard = True)
         t = time()-t
         self.logger('Done in %d sec'%t)
         if report is None:
@@ -32,7 +40,37 @@ class AnimeInfo(ABC):
             return False
         else:
             return True
+    
+    @abstractmethod
+    def getepisodenow(self,url):
+        try:
+            req = requests.get(url)
+        except requests.Exception:
+            self.logger(requests.Exception, status=self.loggermsg.ErrConnect)
+        return req
 
+    @abstractmethod
+    def catchlinks(self, today, links):
+        today = today
+        links = links
+        for link in links:
+            epnow = self.getepisodenow(link['link'])
+            epnn = link['epnow']
+            if epnn == '':
+                continue
+            if int(epnow) == int(epnn):
+                self.logger('No new episode now:{0}/base:{1}'.format(epnow,epnn))
+            else:
+                self.logger('New Episode now:{0}/base:{1}'.format(epnow,epnn))
+                self.db.push([epnow,link])
+        return True
+
+    # Частичное обновление в зависимости от дня недели
+    @abstractmethod
+    def update(self, today, mins):
+        links = self.db.today_links(today)
+        self.catchlinks(today, links)
+        
     @abstractmethod
     def get_links(self, url=None):
         if url is None:
@@ -59,33 +97,14 @@ class AnimeInfo(ABC):
         else:
             return False
 
-    # Рандомим id для аниме
-    def randid(self, ids, idpos):
-        letters = string.ascii_lowercase
-        ident = ''.join(random.choice(letters) for i in range(10))
-        if len(ids) == 1:
-            return ident
-        elif self.check_id(ids, ident, idpos) is False:
-            self.randid(ids, idpos)
-        else:
-            return ident
-
-    # Проверяем, существует ли такой id в нашем списке ids
-
-    @staticmethod
-    def check_id(ids, ident,idpos):
-        ids = ids
-        identificators = []
-        for i in ids:
-            identificators.append(i[idpos])
-
-        if ident in identificators:
-            return False
-        else:
-            return True
-
-    def logger(self,message, status = None):
+    
+    def logger(self, message='', status=None):
         if status is None:
-            print('{0} : {1}'.format(self.name,message))
-        elif status is "Done":
-            print('[+] {0} : {1}'.format(self.name,message))
+            print('{0} : {1}'.format(self.name, message))
+        elif status is self.loggermsg.Done:
+            print('[+] {0} : {1}'.format(self.name, message))
+        elif status is self.loggermsg.ProcConnect:
+            print('{0} connected on pid: {1}'.format(self.name, os.getpid()))
+
+    def devonly(self):
+        self.db.devfunction()
