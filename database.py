@@ -12,8 +12,7 @@ class DataBase(ABC):
     def __init__(self, bdname):
         self.name = bdname
         self.flags = FlagsBD()  
-        print(self.flags.PUSHONE)  
-    #Флаг hard регулирует полную вставку документов с подчищением предыдущих экземляров для fullupd 
+    #Флаг hard регулирует полную вставку документов с подчищением предыдущих экземляров для fullupd
     
     def connect(self):
         connection = pymongo.MongoClient()
@@ -48,8 +47,12 @@ class DataBase(ABC):
                 animelist.append(anime)
         return animelist            
 
-    def get_one(self):
-        pass
+    def get_one(self, name):
+        # anime = name.lower()
+        anime = name
+        animecol, db = self.connect()
+        return animecol.find_one({'name':anime})
+
 
     # ONLY FOR DEV CHANGING ONE ANIME VALUES
     def devfunction(self):
