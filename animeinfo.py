@@ -8,6 +8,22 @@ from threading import Timer
 from bs4 import BeautifulSoup
 import re
 
+'''
+Планы на первый коммит:
+Привести отчеты во всех файлах к виду
+name
+episodenow
+allepisodes
+url
+
+Планы на второй коммит:
+После добавить сравнение данных с базой данных
+Обновление каждые 30 минут
+
+Привести Event loop к нормальному виду
+
+'''
+
 class LoggerMessages:
     def __init__(self):
         self.Done = 'Done'
