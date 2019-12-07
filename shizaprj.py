@@ -41,6 +41,7 @@ class Shizaprj(AnimeInfo):
             name = ''
             episodenow = 0
             allepisodes = 0
+            t = ''
             # Проходимся по всем карточкам на главной
             for card in bs.find_all('article', {'class':self.cardident}):
             # получаем строку в которой хранятся данные о выпуске серий
@@ -52,6 +53,7 @@ class Shizaprj(AnimeInfo):
                 else:
                     episodenow = '1'
                 episodenow = int(episodenow)
+
          #   ищем ссылку в карточке указывающую на страницу аниме
                 link = card.find('a', {'class':self.linkident})
             # получаем информацию об онгоинге(все эпизоды)
@@ -61,10 +63,15 @@ class Shizaprj(AnimeInfo):
                 name = link.find('img').attrs['alt']
                 log = '{0},now:{1},all:{2} Done'.format(name,episodenow,allepisodes)
                 self.logger(log,status=self.loggermsg.Done)
+                if t is '':
+                    t = 'Время выхода неизвестно'
                 report.append({
-                    'name':name,
-                    'epnow':episodenow,
-                    'alleps':allepisodes
+                    'name': name,
+                    'day': day,
+                    'time': t,
+                    'episodenow': episodenow,
+                    'allepisodes': allepisodes,
+                    'url': link.attrs['href']
                 })
         return report
         # проходимся по всем блокам с релизами и смотрим ссылки и названия аниме
@@ -87,9 +94,6 @@ class Shizaprj(AnimeInfo):
             return alleps
         else:
             return False
-
-    def update(self, today, mins):
-        return super().update(today, mins)
 
     def catchlinks(self, today, links):
         return super().catchlinks(today, links)

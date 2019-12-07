@@ -29,28 +29,30 @@ class Anilibria(AnimeInfo):
             for anime in animesblock.find_all('td',{'class':self.linksanime}):
                 link = anime.find('a')
                 url = link.attrs['href']
-                name = link.find('span',{'class':self.animename}).text
-                eps = link.find('span',{'class':self.epnowid})
+                name = link.find('span', {'class': self.animename}).text
+                eps = link.find('span', {'class': self.epnowid})
                 episodenow = re.findall(r'\d[0-9]*', eps.text)
                 if len(episodenow) == 1:
                     episodenow = episodenow[0]
                 else:
                     episodenow = episodenow[1]
                 log = '{0},{1},{2}'.format(name,day,episodenow)
-                self.logger(log,status=self.loggermsg.Done)
+                self.logger(log, status=self.loggermsg.Done)
+                if t is '':
+                    t = 'Время выхода неизвестно'
+                # TODO по какакой то причине отсутсвует получение всех эпизодов аниме
                 report.append({
-                    'name':name,
-                    'day':day,
-                    'epnow':episodenow,
-                    'link':url
+                    'name': name,
+                    'day': day,
+                    'time': t,
+                    'episodenow': episodenow,
+                    'allepisodes': allepisodes,
+                    'url': url
                 })
         return report
 
     def get_ongoing(self, url):
         super().get_ongoing(url)
-
-    def update(self, today, mins):
-        return super().update(today, mins)
 
     def catchlinks(self, today, links):
         return super().catchlinks(today, links)

@@ -21,19 +21,17 @@ class DataBase(ABC):
         return animecol,db
 
     @abstractmethod
-    def push(self,data, hard = False, flag = ''):
+    def push(self, data, hard = False, flag = ''):
         animecol,db = self.connect()
-        if hard is True:
-            db.drop_collection(self.name)
-            animecol.insert_many(data)
-        elif flag is self.flags.PUSHONE:
-            animecol.insert_one(data)
-        else:
-            anime = animecol.find_one({'_id':data[1]['_id']})
-            print(data[0])
-            anime['epnow'] = data[0]
-            animecol.save(anime)
-            print('Done')
+        for item in data:
+            anime = animecol.find_one({'name': item['name']})
+            if anime:
+                print(f'From {anime} changed to {item}')
+                animecol.update(anime, item)
+            else:
+                print(f'Inserting {item} into database')
+                animecol.insert_one(item)
+        print('Done')
         return True
 
     def today_links(self,nowdate):

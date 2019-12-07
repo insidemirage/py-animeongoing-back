@@ -14,6 +14,8 @@ import re
 name
 episodenow
 allepisodes
+day
+time время || Не указано 
 url
 
 Планы на второй коммит:
@@ -23,6 +25,7 @@ url
 Привести Event loop к нормальному виду
 
 '''
+
 
 class LoggerMessages:
     def __init__(self):
@@ -41,11 +44,12 @@ class AnimeInfo(ABC):
         self.name = name
         self.loggermsg = LoggerMessages()
     # Метод запускает полное обновление списка аниме
-    def full_update(self):
+
+    def update(self):
         self.logger(status=self.loggermsg.ProcConnect)
         t = time()
         report = self.get_links()
-        self.db.push(report, hard = True)
+        self.db.push(report)
         t = time()-t
         self.logger('Done in %d sec'%t)
         if report is None:
@@ -83,11 +87,7 @@ class AnimeInfo(ABC):
         return True
 
     # Частичное обновление в зависимости от дня недели
-    @abstractmethod
-    def update(self, today, mins):
-        links = self.db.today_links(today)
-        self.catchlinks(today, links)
-        
+
     @abstractmethod
     def get_links(self, url=None):
         if url is None:

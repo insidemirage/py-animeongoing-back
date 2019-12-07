@@ -4,6 +4,7 @@ import re
 from animeinfo import AnimeInfo
 from database import AnimevostBase
 
+
 class Animevost(AnimeInfo):
 
     def __init__(self, link, onlink, namebase,name):
@@ -12,7 +13,9 @@ class Animevost(AnimeInfo):
         self.linksident = self.linksident.split(', ')
         self.seriaident = 'shortstoryHead'
         self.db = AnimevostBase('animevost')
+
     # Функция для получения списка онгоингов
+
     def get_links(self):
         req = super().get_links()
         if req is False:
@@ -24,8 +27,8 @@ class Animevost(AnimeInfo):
         episodenow = 0
         allepisodes = 0
         i = 0
-        id = ''
-        t = '' #time переменная
+        # time переменная
+        t = ''
         # проходимся по всем блокам с релизами и смотрим ссылки и названия аниме
         for ident in self.linksident:
             for block in bs.find_all('div', {'id': ident}):
@@ -46,14 +49,13 @@ class Animevost(AnimeInfo):
                     episodenow, allepisodes = episodez[0], episodez[1]
                     if episodenow is False:
                         continue
-
                     report.append({
-                        'name':name,
-                        'day':day,
-                        'time':t,
-                        'epnow':episodenow,
-                        'alleps':allepisodes,
-                        'link':href
+                        'name': name,
+                        'day': day,
+                        'time': t,
+                        'episodenow': episodenow,
+                        'allepisodes': allepisodes,
+                        'url': href
                     })
                     log = '{0},{1},{2},now:{3},all:{4}'.format(name,day,t,episodenow,allepisodes)
                     self.logger(log, status=self.loggermsg.Done)
@@ -77,7 +79,7 @@ class Animevost(AnimeInfo):
         if len(t) > 0:
             return t[-1]
         else:
-            return 'ninfo'
+            return 'Время не известно'
 
     def getepisodenow(self, url):
         req = super().getepisodenow(url)
@@ -88,7 +90,4 @@ class Animevost(AnimeInfo):
 
     def catchlinks(self, today, links):
         return super().catchlinks(today, links)
-
-    def update(self, today, mins):
-        super().update(today, mins)
 
